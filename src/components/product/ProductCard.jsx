@@ -1,4 +1,10 @@
+import { useContext, useState } from "react";
+import { CartContext } from "../../context/index";
+
 export default function ProductCard({ product }) {
+  const { addToCart, removeFromCart, cartItems } = useContext(CartContext);
+  const [adding, setAdding] = useState(false);
+
   const {
     id,
     title,
@@ -29,6 +35,34 @@ export default function ProductCard({ product }) {
     : `https://placehold.co/400x400/e2e8f0/64748b?text=${encodeURIComponent(
         title
       )}`;
+
+  const handleAddToCart = async () => {
+    setAdding(true);
+    const result = await addToCart(id, 1);
+    setAdding(false);
+
+    if (result.success) {
+      // Optional: Show success message
+      console.log("Product added to cart!");
+    } else {
+      alert("Failed to add to cart: " + result.error);
+    }
+  };
+
+  const cartItem = cartItems.find((item) => item.productId === id);
+  const isInCart = !!cartItem;
+
+  const handleRemoveFromCart = async () => {
+    if (!cartItem) return;
+
+    setAdding(true);
+    const result = await removeFromCart(cartItem.id);
+    setAdding(false);
+
+    if (!result.success) {
+      alert("Failed to remove from cart: " + result.error);
+    }
+  };
 
   return (
     <div className="soft-card overflow-hidden hover:-translate-y-1 transition-all">
@@ -65,10 +99,21 @@ export default function ProductCard({ product }) {
           </span>
         </div>
         <button
-          className="w-full button-primary py-2.5 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={stock === 0}
+          onClick={isInCart ? handleRemoveFromCart : handleAddToCart}
+          disabled={stock === 0 || adding}
+          className={`w-full py-2.5 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed ${
+            isInCart
+              ? "bg-red-400 text-white hover:bg-red-600"
+              : "button-primary"
+          }`}
         >
-          Add to Cart
+          {adding
+            ? isInCart
+              ? "Removing..."
+              : "Adding..."
+            : isInCart
+            ? "Remove from Cart"
+            : "Add to Cart"}
         </button>
       </div>
     </div>

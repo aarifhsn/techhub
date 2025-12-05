@@ -1,4 +1,9 @@
-export default function Header() {
+import { useContext } from "react";
+import { CartContext } from "../context/index";
+
+export default function Header({ setRoute }) {
+  const { totalItems } = useContext(CartContext);
+
   return (
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -7,12 +12,12 @@ export default function Header() {
             TH
           </div>
           <div className="flex flex-col">
-            <a
-              href="#"
-              className="text-xl font-semibold text-slate-900 tracking-tight"
+            <button
+              onClick={() => setRoute("home")}
+              className="text-xl font-semibold text-slate-900 tracking-tight text-left"
             >
               TechHub
-            </a>
+            </button>
             <span className="text-xs text-slate-500">
               Gear for builders & dreamers
             </span>
@@ -50,8 +55,8 @@ export default function Header() {
               />
             </div>
           </div>
-          <a
-            href="cart.html"
+          <button
+            onClick={() => setRoute("cart")}
             className="relative flex items-center gap-2 px-3 py-2 rounded-full border border-slate-200 bg-white shadow-sm hover:border-rose-300"
           >
             <svg
@@ -69,9 +74,9 @@ export default function Header() {
             </svg>
             <span className="text-sm font-semibold text-slate-900">Cart</span>
             <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-rose-500 text-white text-xs font-bold flex items-center justify-center shadow">
-              3
+              {totalItems}
             </span>
-          </a>
+          </button>
         </div>
       </div>
     </nav>

@@ -4,10 +4,10 @@ import HeroBanner from "./components/HeroBanner";
 import ProductBoard from "./components/product/ProductBoard";
 import Sidebar from "./components/Sidebar";
 
-export default function Page() {
+export default function Page({ setRoute }) {
   return (
     <>
-      <Header />
+      <Header setRoute={setRoute} />
       <main className="max-w-6xl mx-auto px-4 py-12 space-y-10">
         <HeroBanner />
 

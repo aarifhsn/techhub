@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { FilterContext } from "../../context";
 import { productAPI } from "../../services/api";
 import Filters from "./Filters";
 import ProductCard from "./ProductCard";
 
 export default function ProductBoard() {
+  const { filters } = useContext(FilterContext);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,16 +13,20 @@ export default function ProductBoard() {
 
   useEffect(() => {
     fetchProducts();
-  }, [sortBy]);
+  }, [sortBy, filters]);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Map frontend sort values to backend API parameters
-      const sortParams = getSortParams(sortBy);
-      const response = await productAPI.getAll(sortParams);
+      // Combine sort and filter parameters
+      const params = {
+        ...getSortParams(sortBy),
+        ...getFilterParams(filters),
+      };
+
+      const response = await productAPI.getAll(params);
 
       setProducts(response.data);
     } catch (err) {
@@ -49,6 +55,33 @@ export default function ProductBoard() {
       default:
         return {};
     }
+  };
+
+  const getFilterParams = (filterOptions) => {
+    const params = {};
+
+    if (filterOptions.categories.length > 0) {
+      params.category = filterOptions.categories[0];
+    }
+
+    if (filterOptions.priceRanges.length > 0) {
+      const priceMap = {
+        "0-1000": { min: 0, max: 1000 },
+        "1000-2000": { min: 1000, max: 2000 },
+        "2000-3000": { min: 2000, max: 3000 },
+        "3000+": { min: 3000, max: 999999 },
+      };
+
+      const ranges = filterOptions.priceRanges.map((r) => priceMap[r]);
+      params.minPrice = Math.min(...ranges.map((r) => r.min));
+      params.maxPrice = Math.max(...ranges.map((r) => r.max));
+    }
+
+    if (filterOptions.ratings.length > 0) {
+      params.minRating = Math.max(...filterOptions.ratings);
+    }
+
+    return params;
   };
 
   const handleSortChange = (newSort) => {
@@ -99,7 +132,7 @@ export default function ProductBoard() {
   }
 
   // Empty state
-  if (products.length === 0) {
+  if (products.length === 0 && !loading) {
     return (
       <div className="md:col-span-3">
         <Filters
@@ -109,6 +142,7 @@ export default function ProductBoard() {
         />
         <div className="text-center py-12">
           <p className="text-slate-600 text-lg">No products found</p>
+          <p className="text-slate-500 text-sm">Try adjusting your filters</p>
         </div>
       </div>
     );
