@@ -1,8 +1,21 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { CartContext } from "../context/index";
 
-export default function Header({ setRoute }) {
+export default function Header({ setRoute, onSearch }) {
   const { totalItems } = useContext(CartContext);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onSearch(searchQuery);
+    }, 300); // Wait 300ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, onSearch]);
+
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
@@ -50,6 +63,8 @@ export default function Header({ setRoute }) {
               </svg>
               <input
                 type="text"
+                value={searchQuery}
+                onChange={handleSearch}
                 placeholder="Search laptops, GPUs, desktops..."
                 className="bg-transparent text-sm placeholder:text-slate-400 focus:outline-none w-64"
               />

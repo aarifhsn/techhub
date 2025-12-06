@@ -5,8 +5,14 @@ const CART_BASE_URL = "http://localhost:9000";
 export const productAPI = {
   // Get all products with optional filters
   getAll: async (params = {}) => {
+    // Check if there's a search query
+    const hasSearch = params.q && params.q.trim() !== "";
+
+    // Use /search endpoint if searching, otherwise use /products
+    const endpoint = hasSearch ? "/products/search" : "/products";
+
     const queryString = new URLSearchParams(params).toString();
-    const url = `${BASE_URL}/products${queryString ? `?${queryString}` : ""}`;
+    const url = `${BASE_URL}${endpoint}${queryString ? `?${queryString}` : ""}`;
 
     const response = await fetch(url);
     if (!response.ok) throw new Error("Failed to fetch products");

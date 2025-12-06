@@ -4,7 +4,7 @@ import { productAPI } from "../../services/api";
 import Filters from "./Filters";
 import ProductCard from "./ProductCard";
 
-export default function ProductBoard() {
+export default function ProductBoard({ searchQuery }) {
   const { filters } = useContext(FilterContext);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +13,7 @@ export default function ProductBoard() {
 
   useEffect(() => {
     fetchProducts();
-  }, [sortBy, filters]);
+  }, [sortBy, filters, searchQuery]);
 
   const fetchProducts = async () => {
     try {
@@ -26,7 +26,13 @@ export default function ProductBoard() {
         ...getFilterParams(filters),
       };
 
+      if (searchQuery && searchQuery.trim() !== "") {
+        params.q = searchQuery;
+      }
+
       const response = await productAPI.getAll(params);
+      console.log("Search params:", params);
+      console.log("Response:", response.data);
 
       setProducts(response.data);
     } catch (err) {
